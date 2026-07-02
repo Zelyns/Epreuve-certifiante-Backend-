@@ -48,7 +48,7 @@ pipeline {
           string(credentialsId: 'sonarqube-host-url', variable: 'SONAR_HOST_URL'),
           string(credentialsId: 'sonarqube-backend-token', variable: 'SONAR_TOKEN')
         ]) {
-          sh 'npx sonarqube-scanner -Dsonar.projectKey=tasklist-backend -Dsonar.sources=src -Dsonar.exclusions=src/__tests__/** -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.login=$SONAR_TOKEN'
+          sh 'npx sonarqube-scanner -Dsonar.projectKey=exam_er_backend -Dsonar.sources=src -Dsonar.exclusions=src/__tests__/** -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.login=$SONAR_TOKEN'
         }
       }
     }
