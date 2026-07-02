@@ -3,7 +3,7 @@ pipeline {
 
   environment {
     NODE_IMAGE = 'node:20-alpine'
-    DOCKER_IMAGE = 'taskcamel/tasklist-backend:latest'
+    DOCKER_IMAGE = 'etienner78/tasklist-backend:latest'
   }
 
   stages {
