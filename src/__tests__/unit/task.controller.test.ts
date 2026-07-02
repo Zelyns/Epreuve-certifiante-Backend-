@@ -1,6 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { Request, Response } from "express";
-import type { Task } from "@prisma/client";
+
+interface TaskRecord {
+	id: number;
+	title: string;
+	description: string | null;
+	completed: boolean;
+	createdAt: Date;
+	updatedAt: Date;
+}
 
 // Mock the service module
 vi.mock("../../services/task.service.js", () => ({
@@ -16,7 +24,7 @@ import * as taskController from "../../controllers/task.controller.js";
 
 const mockService = vi.mocked(taskService);
 
-const mockTask: Task = {
+const mockTask: TaskRecord = {
 	id: 1,
 	title: "Test Task",
 	description: "Test description",
@@ -62,10 +70,28 @@ describe("TaskController", () => {
 		});
 	});
 
-	// ... TODO: Add more tests
-	/*
-	describe("getTaskById", () => {
-		...	
+describe("getTaskById", () => {
+		it("should return 404 when task does not exist", async () => {
+			mockService.findById.mockResolvedValue(null);
+			const req = createMockRequest({ params: { id: "99" } });
+			const res = createMockResponse();
+
+			await taskController.getTaskById(req, res);
+
+			expect(res.status).toHaveBeenCalledWith(404);
+			expect(res.json).toHaveBeenCalledWith({ error: "Task not found" });
+		});
 	});
-	*/
+
+	describe("createTask", () => {
+		it("should return 400 when title is empty", async () => {
+			const req = createMockRequest({ body: { title: "   " } });
+			const res = createMockResponse();
+
+			await taskController.createTask(req, res);
+
+			expect(res.status).toHaveBeenCalledWith(400);
+			expect(res.json).toHaveBeenCalledWith({ error: "Title is required and must be a non-empty string" });
+		});
+	});
 });

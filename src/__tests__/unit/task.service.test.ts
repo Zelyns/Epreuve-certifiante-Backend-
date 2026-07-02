@@ -1,5 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import type { Task } from "@prisma/client";
+
+interface TaskRecord {
+	id: number;
+	title: string;
+	description: string | null;
+	completed: boolean;
+	createdAt: Date;
+	updatedAt: Date;
+}
 
 // Mock the prisma module before importing the service
 vi.mock("../../lib/prisma.js", () => {
@@ -21,7 +29,7 @@ import * as taskService from "../../services/task.service.js";
 
 const mockPrisma = vi.mocked(prisma);
 
-const mockTask: Task = {
+const mockTask: TaskRecord = {
 	id: 1,
 	title: "Test Task",
 	description: "A test task description",
@@ -49,10 +57,27 @@ describe("TaskService", () => {
 		});
 	});
 
-	// ... TODO: Add more tests
-	/*
-	describe("findById", () => {
-		...	
+describe("findById", () => {
+		it("should return a task by id", async () => {
+			(mockPrisma.task.findUnique as any).mockResolvedValue(mockTask);
+
+			const result = await taskService.findById(1);
+
+			expect(result).toEqual(mockTask);
+			expect(mockPrisma.task.findUnique).toHaveBeenCalledWith({ where: { id: 1 } });
+		});
 	});
-	*/
+
+	describe("create", () => {
+		it("should create a task with trimmed title", async () => {
+			(mockPrisma.task.create as any).mockResolvedValue(mockTask);
+
+			const result = await taskService.create({ title: "New Task", description: "desc" });
+
+			expect(result).toEqual(mockTask);
+			expect(mockPrisma.task.create).toHaveBeenCalledWith({
+				data: { title: "New Task", description: "desc" },
+			});
+		});
+	});
 });
