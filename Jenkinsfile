@@ -44,7 +44,12 @@ pipeline {
 
     stage('Static analysis') {
       steps {
-        sh 'npx sonarqube-scanner -Dsonar.projectKey=tasklist-backend -Dsonar.sources=src -Dsonar.exclusions=src/__tests__/** -Dsonar.host.url=${SONAR_HOST_URL} -Dsonar.login=${SONAR_TOKEN}'
+        withCredentials([
+          string(credentialsId: 'sonarqube-host-url', variable: 'SONAR_HOST_URL'),
+          string(credentialsId: 'sonarqube-backend-token', variable: 'SONAR_TOKEN')
+        ]) {
+          sh 'npx sonarqube-scanner -Dsonar.projectKey=tasklist-backend -Dsonar.sources=src -Dsonar.exclusions=src/__tests__/** -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.login=$SONAR_TOKEN'
+        }
       }
     }
 
@@ -57,6 +62,17 @@ pipeline {
     stage('Security scan') {
       steps {
         sh 'trivy image --exit-code 0 --severity HIGH,CRITICAL ${DOCKER_IMAGE}'
+      }
+    }
+
+    stage('Generate SBOM') {
+      steps {
+        sh 'trivy image --format spdx-json --output sbom-spdx.json ${DOCKER_IMAGE}'
+      }
+      post {
+        always {
+          archiveArtifacts artifacts: 'sbom-spdx.json', fingerprint: true
+        }
       }
     }
 
